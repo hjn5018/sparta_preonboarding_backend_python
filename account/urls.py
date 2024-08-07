@@ -3,5 +3,5 @@ from account import views
 
 
 urlpatterns = [
-    path('signup/', views.signupAPIview),
+    path('signup/', views.SignupAPIView.as_view()),
 ]
