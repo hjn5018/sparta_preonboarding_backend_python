@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 
+from account.models import Role, UserRole
+
 class SignupAPIView(APIView):
     def post(self, request):
         user = get_user_model().objects.create(
@@ -9,14 +11,11 @@ class SignupAPIView(APIView):
             password = request.data.get("password"),
             nickname = request.data.get("nickname"),
         )
-        if user.is_superuser:
-            role = "superuser"
-        elif user.is_staff:
-            role = "staff"
-        else:
-            role = "user"
+        role, created = Role.objects.get_or_create(role='USER')
+        UserRole.objects.create(user=user, user_role=role)
+        user_roles = UserRole.objects.filter(user=user)
         return Response({
             "username": user.username,
             "nickname": user.nickname,
-            "role": role
+            "roles": [{'role': user_role.user_role.role} for user_role in user_roles],
         })
